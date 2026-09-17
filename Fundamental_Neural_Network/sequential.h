@@ -16,7 +16,7 @@ class Seq{
         error=Error;
         input_dim=single_input_dim;
     }
-    void addDense(int Size,std::string activation = "Linear"){ // add layers to the seq model
+    void addDense(int Size,std::string activation = "linear"){ // add layers to the seq model
         layers.push_back(std::make_unique<Dense>(Size, activation));
     }
     void compile(){ // resize weight matrices of each layer
@@ -66,11 +66,12 @@ class Seq{
         std::random_device rd;
         std::default_random_engine rng(rd());
         for (size_t i = 0; i < indices.size(); ++i) indices[i] = i;
-        if(shuffle){
-            // Shuffle indices
-            std::shuffle(indices.begin(), indices.end(), rng);
-        }
+
         for(int _ = 0;_<epochs;_++){
+            if(shuffle){
+                // Shuffle indices
+                std::shuffle(indices.begin(), indices.end(), rng);
+            }
             double train_avg_error=0;
             int i;
             for(i = 0;i<train;i++){

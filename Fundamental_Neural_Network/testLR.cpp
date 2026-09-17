@@ -22,7 +22,7 @@ int main(){
     model.addDense(2,"relu");
     model.addDense(5, "relu");
     model.addDense(5, "relu");
-    model.addDense(1, "Linear");
+    model.addDense(1, "linear");
     model.compile();
     //std::cout<<"Start 3"<<std::endl;
     auto history = model.fit(x,y,500,0.001);
@@ -30,6 +30,6 @@ int main(){
     for(auto &x:history) std::cout<<"Train error: "<<x.first<<"  Test error: "<<x.second<<std::endl;
     tensor test({2},{3,-3});
     auto res = model.pred(test);
-    std::cout<<"Prediction for x1,x2 = 3,-3 is: "<<res.getValArray()[0];
+    std::cout<<std::endl<<"Prediction for x1,x2 = 3,-3 is: "<<res.getValArray()[0]<<std::endl;
 
 }

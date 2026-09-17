@@ -6,28 +6,38 @@
 #include <memory>
 #include <random>
 #include "layer.h"
+#include "ActivationClasses.h"
 class Dense: public Layer{
     public:
     int size;  //neuron count
     inline static std::mt19937 generator{std::random_device{}()}; // random generator
+    
     //layer data
     tensor weights; //2d tensor by size x input
     tensor bias;  //1 d tensor by size
-    std::string activation;
+    //std::vector<int> output_dims; inherited from layer
+
     //forward pass(preds)
     tensor last_raw_output;
+    //tensor last_output; inherited from layer
+    // tensor last_input; inherited from layer
+    
     //gradient descent cache
     tensor grad_weights;
     tensor grad_bias;
     tensor grad_input;
-    Dense(int Size, std::string Activation="Linear"){
+    
+    //base class activation pointer. inherited class will be assigned later.
+    std::unique_ptr<ActivationBaseClass> activation;
+    
+    Dense(int Size, std::string Activation="linear"){
         size=Size;
-        output_dims={};
-        output_dims.push_back(size);
-        activation=Activation;
+
         last_output.setDim({size});
         last_raw_output.setDim({size});
         output_dims={size};
+
+        activation = assignActivation(Activation);
     }
     
     void build(const std::vector<int> &prev_dim) override { // resize and initialize all matrix
@@ -42,7 +52,7 @@ class Dense: public Layer{
     }
     tensor backward(tensor &grad_op) override{
         // f'(raw output)
-        tensor delta = activationSpecificDerivative(activation,last_raw_output);
+        tensor delta = activation->returnDerivative(last_raw_output);
         
         // convert it into dL/dZ aka theta(delta here)
         delta = multiply(delta,grad_op);
@@ -58,7 +68,7 @@ class Dense: public Layer{
     void layerCompute(tensor &input)override { //forward pass calc
         last_input.copyTensor(input);
         last_raw_output=add(matMul( weights,input),bias);
-        last_output = performActivation(activation, last_raw_output);
+        last_output = activation->performActivation(last_raw_output);
 
     }
     void update(double learning_rate) override {
