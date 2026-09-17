@@ -4,16 +4,16 @@
 #include <string>
 #include <algorithm>
 #include "Dense.h"
-
+#include "LossClasses.h"
 class Seq{
     private:
     std::vector<std::unique_ptr<Layer>> layers;
-    std::string error;
-    std::vector<int> input_dim;
+    std::unique_ptr<LossBaseClass> loss;
+    std::vector<int> input_dim; //will be specified to an inherited class in constructor during run time
     bool compiled = false;
     public:
-    Seq(std::vector<int> single_input_dim, std::string Error="mse"){
-        error=Error;
+    Seq(std::vector<int> single_input_dim, std::string Loss="mse"){
+        loss = assignLoss(Loss);
         input_dim=single_input_dim;
     }
     void addDense(int Size,std::string activation = "linear"){ // add layers to the seq model
@@ -35,7 +35,7 @@ class Seq{
         for(int i = 1;i<layers.size();i++){
             layers[i]->layerCompute(layers[i-1]->last_output);
         }
-        double l = mse(target,layers[layers.size()-1]->last_output);
+        double l = loss->getError(target,layers[layers.size()-1]->last_output);
         //backward pass
         tensor gradient = subtract(layers[layers.size()-1]->last_output,target);
         tensorMulScalar_inplace(gradient,(2.0/target.getSize()));
@@ -54,7 +54,7 @@ class Seq{
         for(int i = 1;i<layers.size();i++){
             layers[i]->layerCompute(layers[i-1]->last_output);
         }
-        double l = mse(target,layers[layers.size()-1]->last_output);
+        double l = loss->getError(target,layers[layers.size()-1]->last_output);
         return l;
     }
     std::vector<std::pair<double,double>> fit(std::vector<tensor> &inputArray, std::vector<tensor> &targetArray, int epochs, double learning_rate = 0.0001,bool shuffle=true, float split=0.8){
@@ -79,7 +79,7 @@ class Seq{
                 tensor ip = inputArray[i];
                 tensor op = targetArray[i];
                 if(ip.getDims()!=input_dim) throw std::invalid_argument("Given input dimensions and model input dimensions dont match at index "+ std::to_string(idx));
-                train_avg_error += onePassUpdate(ip,op,learning_rate);
+                train_avg_error += onePassUpdate(ip,op,learning_rate); //this one gets loss and updates
             }
             train_avg_error/=train;
             double test_avg_error=0;
@@ -88,7 +88,7 @@ class Seq{
                 tensor ip = inputArray[i];
                 tensor op = targetArray[i];
                 if(ip.getDims()!=input_dim) throw std::invalid_argument("Given input dimensions and model input dimensions dont match at index "+ std::to_string(idx));
-                test_avg_error+=test(ip,op);
+                test_avg_error+=test(ip,op); //this one gets loss and doesnt update
             }
             test_avg_error/=(inputArray.size()-train);
             history.push_back({train_avg_error,test_avg_error});
