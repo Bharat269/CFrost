@@ -3,7 +3,11 @@
 #define CUSTOMMATH_H
 #include <vector>
 #include <string>
-#include <Eigen/Dense>
+
+/*
+CREATE A HELPER FUNCTION TO CONVERT TO AND FROM CUSTOM TENSOR A CPU OR GPU BASED BUILT-IN TENSOR FOR BETTER ABSTRACTION
+*/
+
 //normal matrix vector mult 
 std::vector<double> vecXmatrix(std::vector<double> input_vector, std::vector<std::vector<double>> &weights);
 

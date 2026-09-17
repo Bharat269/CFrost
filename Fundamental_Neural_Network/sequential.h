@@ -2,122 +2,64 @@
 #define SEQUENTIAL_H 
 #include <vector>
 #include <string>
-#include "custommathcpp.h"
-#include <memory>
-#include <random>
 #include <algorithm>
+#include "Dense.h"
 
-class dense {
-    public:
-    int size;
-    inline static std::mt19937 generator{std::random_device{}()}; // random generator
-    //layer data
-    std::vector<std::vector<double>> weights;
-    std::vector<double> bias;
-    std::string activation;
-    //forward pass(preds)
-    std::vector<double> last_raw_output;
-    std::vector<double> last_output;
-    std::vector<double> last_input;
-    //gradient descent cache
-    std::vector<std::vector<double>> grad_weights;
-    std::vector<double> grad_bias;
-    std::vector<double> grad_input;
-    dense(int Size, std::string Activation="Linear"){
-        size=Size;
-        activation=Activation;
-        grad_weights.resize(size);
-        
-    }
-
-    void resize(int in) {
-            weights.resize(size);
-            bias.assign(size, 0.0);
-            
-            // Properly seeded Xavier/Glorot uniform initialization
-            double limit = std::sqrt(6.0 / (in + size));
-            std::uniform_real_distribution<double> distribution(-limit, limit);
-            for (auto &row : weights) {
-                row.resize(in);
-                for (double &w : row) {
-                    w = distribution(generator);
-                }
-            }
-        }
-    std::vector<double> backward(std::vector<double> &grad_op){
-        // f'(raw output)
-        std::vector<double> delta = activationSpecificDerivative(activation,last_raw_output);
-        
-        // convert it into dL/dZ aka theta(delta here)
-        delta = vectorPointWiseMult(delta,grad_op);
-
-        //dL/dW
-        grad_weights= vecTransposeMultVector(delta,last_input);
-        //dL/dBias
-        grad_bias = delta;
-        //dL/dinput
-        grad_input = vecTransposeXmatrix(delta, weights);
-        return grad_input;
-    }
-    void layerCompute(std::vector<double> &input){
-        last_input=input;
-        last_raw_output = addBias(vecXmatrix(input, weights),bias);
-        last_output = performActivation(activation, last_raw_output);
-    }
-
-};
 class Seq{
-    public:
-    std::vector<std::unique_ptr<dense>> layers;
+    private:
+    std::vector<std::unique_ptr<Layer>> layers;
     std::string error;
-    int input_dim;
+    std::vector<int> input_dim;
+    bool compiled = false;
     public:
-    Seq(int ip_size,int first_layer_dim, std::string activation = "Linear", std::string Error="mse"){
-        layers.push_back(std::make_unique<dense>(first_layer_dim, activation));
+    Seq(std::vector<int> single_input_dim, std::string Error="mse"){
         error=Error;
-        input_dim=ip_size;
+        input_dim=single_input_dim;
     }
-    void add(int Size,std::string activation = "Linear"){
-        layers.push_back(std::make_unique<dense>(Size, activation));
+    void addDense(int Size,std::string activation = "Linear"){ // add layers to the seq model
+        layers.push_back(std::make_unique<Dense>(Size, activation));
     }
     void compile(){ // resize weight matrices of each layer
-        layers[0]->resize(input_dim);
+        if(layers.size()==0) throw std::invalid_argument("No layers in sequential model.");
+        layers[0]->build(input_dim);
         for(int i = 1;i<layers.size();i++){
-            layers[i]->resize(layers[i-1]->size);
+            layers[i]->build(layers[i-1]->output_dims);
         }
+        compiled=true;
     }
-   
-    double onePassUpdate(std::vector<double> &input_vals, std::vector<double> &target, double &learning_rate){  //perform one pass through the neural net
+
+    double onePassUpdate(tensor &input_vals, tensor &target, double &learning_rate){  //perform one pass through the neural net(fwd computation, back propogation, parameter update)
+        if(!compiled) throw std::invalid_argument("Model not compiled yet.");
         //forward pass
         layers[0]->layerCompute(input_vals);
         for(int i = 1;i<layers.size();i++){
             layers[i]->layerCompute(layers[i-1]->last_output);
         }
-        double l = getError(target,layers[layers.size()-1]->last_output,error);
+        double l = mse(target,layers[layers.size()-1]->last_output);
         //backward pass
-        std::vector<double> gradient;
-        gradient = vectorSubtract(layers[layers.size()-1]->last_output,target);
-        double scale = 2.0/target.size();
-        for(auto &g:gradient) g*=scale;
+        tensor gradient = subtract(layers[layers.size()-1]->last_output,target);
+        tensorMulScalar_inplace(gradient,(2.0/target.getSize()));
         for(int i = layers.size() - 1; i >= 0; i--) {
             gradient = layers[i]->backward(gradient);
         }
         //update weights and bias
-        for(int i = 0;i<layers.size();i++){
-            updateWeights(layers[i]->weights,layers[i]->grad_weights,learning_rate);
-            updateBias(layers[i]->bias,layers[i]->grad_bias,learning_rate);
+        for(auto &x:layers){
+            x->update(learning_rate);
         }
         return l;
     }
-    double test(std::vector<double> &input_vals, std::vector<double> &target){
+    double test(tensor &input_vals, tensor &target){
+        if(!compiled) throw std::invalid_argument("Model not compiled yet.");
         layers[0]->layerCompute(input_vals);
         for(int i = 1;i<layers.size();i++){
             layers[i]->layerCompute(layers[i-1]->last_output);
         }
-        double l = getError(target,layers[layers.size()-1]->last_output,error);
+        double l = mse(target,layers[layers.size()-1]->last_output);
         return l;
     }
-    std::vector<std::pair<double,double>> fit(std::vector<std::vector<double>> &inputArray, std::vector<std::vector<double>> &targetArray, int epochs, double learning_rate = 0.0001,bool shuffle=true, float split=0.8){
+    std::vector<std::pair<double,double>> fit(std::vector<tensor> &inputArray, std::vector<tensor> &targetArray, int epochs, double learning_rate = 0.0001,bool shuffle=true, float split=0.8){
+        if(!compiled) throw std::invalid_argument("Model not compiled yet.");
+        if(inputArray.size()!=targetArray.size()) throw std::invalid_argument("Number of rows in input data and target data are not equal");
         std::vector<std::pair<double,double>> history;
         int train=split*inputArray.size();
         std::vector<int> indices(inputArray.size());
@@ -133,26 +75,35 @@ class Seq{
             int i;
             for(i = 0;i<train;i++){
                 int idx = indices[i];
-                train_avg_error += onePassUpdate(inputArray[idx],targetArray[idx],learning_rate);
+                tensor ip = inputArray[i];
+                tensor op = targetArray[i];
+                if(ip.getDims()!=input_dim) throw std::invalid_argument("Given input dimensions and model input dimensions dont match at index "+ std::to_string(idx));
+                train_avg_error += onePassUpdate(ip,op,learning_rate);
             }
             train_avg_error/=train;
             double test_avg_error=0;
             for(;i<inputArray.size();i++){
                 int idx = indices[i];
-                test_avg_error+=test(inputArray[idx],targetArray[idx]);
+                tensor ip = inputArray[i];
+                tensor op = targetArray[i];
+                if(ip.getDims()!=input_dim) throw std::invalid_argument("Given input dimensions and model input dimensions dont match at index "+ std::to_string(idx));
+                test_avg_error+=test(ip,op);
             }
             test_avg_error/=(inputArray.size()-train);
             history.push_back({train_avg_error,test_avg_error});
         }
         return history;
     }
-    std::vector<double> pred(std::vector<double> input_vals){
+    tensor pred(tensor input_vals){ 
+        if(!compiled) throw std::invalid_argument("Model not compiled yet.");
+        if(input_vals.getDims()!=input_dim) throw std::invalid_argument("Given input dimensions and model input dimensions dont match");
         layers[0]->layerCompute(input_vals);
         for(int i = 1;i<layers.size();i++){
             layers[i]->layerCompute(layers[i-1]->last_output);
         }
         return layers[layers.size()-1]->last_output;
     }
+
     
 };
 #endif
