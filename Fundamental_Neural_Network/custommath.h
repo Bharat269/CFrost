@@ -33,12 +33,5 @@ std::vector<double> performActivation(std::string &activation,std::vector<double
 std::vector<double> activationSpecificDerivative(std::string activation, std::vector<double> &last_raw_output);
 
 //loss calc
-double mse(std::vector<double> &target, std::vector<double> pred);
-
-double mse(double target, std::vector<double> pred);
-
-double getError(double target, double pred, std::string error);
-
-double getError(std::vector<double> &target, std::vector<double> pred, std::string error);
 
 #endif

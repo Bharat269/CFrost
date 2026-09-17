@@ -3,8 +3,8 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-#include "Dense.h"
 #include "LossClasses.h"
+#include "Dense.h"
 class Seq{
     private:
     std::vector<std::unique_ptr<Layer>> layers;
@@ -37,8 +37,7 @@ class Seq{
         }
         double l = loss->getError(target,layers[layers.size()-1]->last_output);
         //backward pass
-        tensor gradient = subtract(layers[layers.size()-1]->last_output,target);
-        tensorMulScalar_inplace(gradient,(2.0/target.getSize()));
+        tensor gradient = loss->getGradient(layers[layers.size()-1]->last_output,target);
         for(int i = layers.size() - 1; i >= 0; i--) {
             gradient = layers[i]->backward(gradient);
         }

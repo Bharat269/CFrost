@@ -2,7 +2,6 @@
 #define DENSE_H
 #include "tensor.h"
 #include <string>
-#include "CustomMath_CPU.h"
 #include <memory>
 #include <random>
 #include "layer.h"

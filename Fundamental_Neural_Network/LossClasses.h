@@ -4,10 +4,12 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include "CustomMath_CPU.h"
 class LossBaseClass{
     public:
     virtual double getError(const tensor& target,const tensor& prediction)=0;
-    ~LossBaseClass() = default;
+    virtual tensor getGradient(const tensor &pred, const tensor &target)=0;
+    virtual ~LossBaseClass() = default;
 };
 class mse: public LossBaseClass{
     public:
@@ -20,6 +22,12 @@ class mse: public LossBaseClass{
             sum += difference * difference;
         }
         return sum / static_cast<double>(target.getSize());
+    }
+    tensor getGradient(const tensor &pred, const tensor &target) override{
+        if(pred.getDims()!=target.getDims()) throw std::invalid_argument("In LossClasses::mse::getGradient, target and prediction tensors dont have equal dimensions.");
+        tensor gradient = subtract(pred,target);
+        tensorMulScalar_inplace(gradient,(2.0/target.getSize()));
+        return gradient;
     }
 };
 
