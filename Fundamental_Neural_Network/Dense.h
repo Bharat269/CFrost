@@ -40,6 +40,8 @@ class Dense: public Layer{
     }
     
     void build(const std::vector<int> &prev_dim) override { // resize and initialize all matrix
+        if(prev_dim.empty())throw std::invalid_argument("In Dense::build(), previous layer has no output dimensions.");
+        if(prev_dim.size()!=1) throw std::invalid_argument("In Dense::build(), output dimensions of the layer before a dense layer must be 1D."); //in case someone tries fitting a conv2d or pool layer without flattening ig
         int in = prev_dim[0];
         weights.setDim({size,in}); //input being scalar here is okk because dense will only have 1D
         grad_weights.setDim({size,in});
@@ -64,7 +66,7 @@ class Dense: public Layer{
         grad_input = transposeMatMul(delta, weights);
         return grad_input;
     }
-    void layerCompute(tensor &input)override { //forward pass calc
+    void layerCompute(tensor &input) override { //forward pass calc
         last_input.copyTensor(input);
         last_raw_output=add(matMul( weights,input),bias);
         last_output = activation->performActivation(last_raw_output);
