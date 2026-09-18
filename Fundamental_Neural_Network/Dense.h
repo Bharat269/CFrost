@@ -39,7 +39,7 @@ class Dense: public Layer{
         activation = assignActivation(Activation);
     }
     
-    void build(const std::vector<int> &prev_dim) override { // resize and initialize all matrix
+    void build(const std::vector<int> &prev_dim) override { // resize and initialize all parameters. Called sequentially for all layers.
         if(prev_dim.empty())throw std::invalid_argument("In Dense::build(), previous layer has no output dimensions.");
         if(prev_dim.size()!=1) throw std::invalid_argument("In Dense::build(), output dimensions of the layer before a dense layer must be 1D."); //in case someone tries fitting a conv2d or pool layer without flattening ig
         int in = prev_dim[0];

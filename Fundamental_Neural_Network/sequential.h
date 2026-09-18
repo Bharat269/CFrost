@@ -4,7 +4,7 @@
 #include <string>
 #include <algorithm>
 #include "LossClasses.h"
-#include "Dense.h"
+#include "layer.h"
 class Seq{
     private:
     std::vector<std::unique_ptr<Layer>> layers;
@@ -16,8 +16,8 @@ class Seq{
         loss = assignLoss(Loss);
         input_dim=single_input_dim;
     }
-    void addDense(int Size,std::string activation = "linear"){ // add layers to the seq model
-        layers.push_back(std::make_unique<Dense>(Size, activation));
+    void add(std::unique_ptr<Layer> layer) {
+        layers.push_back(std::move(layer));
     }
     void compile(){ // resize weight matrices of each layer
         if(layers.size()==0) throw std::invalid_argument("No layers in sequential model.");
@@ -48,6 +48,7 @@ class Seq{
         return l;
     }
     double test(tensor &input_vals, tensor &target){
+        if(input_vals.getDims()!=input_dim) throw std::invalid_argument("In Seq::test(), he given input's dimensions do not match the pre defined input dimensions of the model.");
         if(!compiled) throw std::invalid_argument("Model not compiled yet.");
         layers[0]->layerCompute(input_vals);
         for(int i = 1;i<layers.size();i++){
@@ -57,8 +58,8 @@ class Seq{
         return l;
     }
     std::vector<std::pair<double,double>> fit(std::vector<tensor> &inputArray, std::vector<tensor> &targetArray, int epochs, double learning_rate = 0.0001,bool shuffle=true, float split=0.8){
-        if(!compiled) throw std::invalid_argument("Model not compiled yet.");
-        if(inputArray.size()!=targetArray.size()) throw std::invalid_argument("Number of rows in input data and target data are not equal");
+        if(!compiled) throw std::invalid_argument("In Seq::fit(), Model not compiled yet.");
+        if(inputArray.size()!=targetArray.size()) throw std::invalid_argument("Seq::fit(), number of rows in input data and target data are not equal");
         std::vector<std::pair<double,double>> history;
         int train=split*inputArray.size();
         std::vector<int> indices(inputArray.size());
@@ -95,6 +96,7 @@ class Seq{
         return history;
     }
     tensor pred(tensor input_vals){ 
+        if(input_vals.getDims()!=input_dim) throw std::invalid_argument("In Seq::pred(), he given input's dimensions do not match the pre defined input dimensions of the model.");
         if(!compiled) throw std::invalid_argument("Model not compiled yet.");
         if(input_vals.getDims()!=input_dim) throw std::invalid_argument("Given input dimensions and model input dimensions dont match");
         layers[0]->layerCompute(input_vals);
