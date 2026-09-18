@@ -46,5 +46,10 @@ void updateWeights(tensor& weights,const tensor& gradWeights,double learningRate
 void updateBias(tensor& bias,const tensor& gradBias,double learningRate);
 
 //conv2D operations
+/*
+input:   {input_channels, input_height, input_width}
+filters: {filter_count, input_channels, kernel_height, kernel_width}
+result:  {filter_count, output_height, output_width}
+*/
 tensor conv2D(const tensor& input,const tensor& filters,int step);
 #endif
