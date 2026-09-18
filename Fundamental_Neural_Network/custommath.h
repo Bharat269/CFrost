@@ -52,4 +52,5 @@ filters: {filter_count, input_channels, kernel_height, kernel_width}
 result:  {filter_count, output_height, output_width}
 */
 tensor conv2D(const tensor& input,const tensor& filters,int step);
+tensor addBias(const tensor& feature_maps, const tensor& bias);
 #endif
