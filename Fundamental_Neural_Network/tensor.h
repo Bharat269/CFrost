@@ -19,10 +19,12 @@ public:
         vals={};
     }
     explicit tensor(const std::vector<int>& dimensions) {
+        for (const int &x:dimensions) if(x<=0) throw std::invalid_argument("In Tensor::tensor(const std::vector<int>& dimensions), negative or zero dimensions are invalid.");
         dims = dimensions;
         vals.resize(getSize());
     }
     tensor(const std::vector<int>& dimensions,const std::vector<double>& values){
+        for (const int &x:dimensions) if(x<=0) throw std::invalid_argument("In Tensor::tensor(const std::vector<int>& dimensions,const std::vector<double>& values), negative or zero dimensions are invalid.");
         dims = dimensions;
         if (values.size() != getSize()){
             throw std::invalid_argument("Tensor data size does not match dimensions");
@@ -71,6 +73,7 @@ public:
         return vals;
     }
     void setDim(std::vector<int> dimensions){ //set dimensions and resize vals by flattened(dim)
+        for (int &x:dimensions) if(x<=0) throw std::invalid_argument("In Tensor::setDim(), negative or zero dimensions are invalid.");
         dims =dimensions;
         vals.resize(getSize());
     }
@@ -90,6 +93,7 @@ public:
         std::uniform_real_distribution<double> distribution(-limit, limit);
         for(double &x:vals) x = distribution(generator);
     }
+
 };
 
 #endif
