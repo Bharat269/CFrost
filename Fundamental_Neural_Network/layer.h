@@ -4,7 +4,7 @@
 #include "tensor.h"
 class Layer {
 public:
-    std::vector<int> output_dims; // to pass into the next layer so it can form its weight matrix
+    std::vector<int> output_dims; // to pass into the next layer so it can form its parameter tensor. Used in build function of layers.
     //for back prop
     tensor last_output;
     tensor last_input;

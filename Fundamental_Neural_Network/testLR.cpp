@@ -1,10 +1,10 @@
 #include <iostream>
 #include "sequential.h"
+#include "Dense.h"
 #include <vector>
-#include "tensor.h"
 
 
-//y=3x1​−2x2​+5
+//y= 3x1 ​− 2x2 ​+ 5
 //test this eqn to see if the model learns i.e. the gradient descends
 
 int main(){
@@ -19,13 +19,14 @@ int main(){
     }
     // std::cout<<"Start 2"<<std::endl;
     Seq model({2});
-    model.addDense(2,"relu");
-    model.addDense(5, "relu");
-    model.addDense(5, "relu");
-    model.addDense(1, "linear");
+    model.add(std::make_unique<Dense>(2, "relu"));
+    model.add(std::make_unique<Dense>(5, "relu"));
+    model.add(std::make_unique<Dense>(5, "relu"));
+    model.add(std::make_unique<Dense>(1, "linear"));
+    
     model.compile();
     //std::cout<<"Start 3"<<std::endl;
-    auto history = model.fit(x,y,500,0.001);
+    auto history = model.fit(x,y,100,0.001);
     //std::cout<<"Start 4"<<std::endl;
     for(auto &x:history) std::cout<<"Train error: "<<x.first<<"  Test error: "<<x.second<<std::endl;
     tensor test({2},{3,-3});

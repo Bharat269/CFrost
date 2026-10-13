@@ -26,7 +26,7 @@ class mse: public LossBaseClass{
     tensor getGradient(const tensor &pred, const tensor &target) override{
         if(pred.getDims()!=target.getDims()) throw std::invalid_argument("In LossClasses::mse::getGradient, target and prediction tensors dont have equal dimensions.");
         tensor gradient = subtract(pred,target);
-        tensorMulScalar_inplace(gradient,(2.0/target.getSize()));
+        tensorMulScalar_inplace(gradient,(1.0/target.getSize()));
         return gradient;
     }
 };
