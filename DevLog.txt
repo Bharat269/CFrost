@@ -1,0 +1,17 @@
+Up until 31-01-2026
+- created tensor class, sequential model class, layer class(dense), activation func class(relu, linearm sigmoid), loss class(mse)
+- custom math file that abstracts to custom math cpu or gpu(yet to be implemented)
+- underway to create conv2d
+
+31-10-2026
+-halting conv2d
+- targting to create an llm purely in c++
+- goals of the llm will be a lightweight engine, easy interface, plug in support, hardware support
+- these goals will reuire to later on delve into compiler graph operation fuser stuff and hardware based optimization e.g. quanization
+NEW GOALS (deliverable mvp before all these optimaztions)-
+-embeddings layer 
+-gpt style transformer layer
+-tokenization
+-softmax
+Since this is a resource critical phase, tensor class may need to be optimized for elaborate row major or column major support. 
+Furthermore the math classes might need to be perfected, and look into CUDA support.
