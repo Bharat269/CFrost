@@ -1,7 +1,6 @@
-#ifndef LAYER_H
-#define LAYER_H
+#pragma once
 #include <vector>
-#include "tensor.h"
+#include <Tensor/tensor.h>
 class Layer {
 public:
     std::vector<int> output_dims; // to pass into the next layer so it can form its parameter tensor. Used in build function of layers.
@@ -19,4 +18,3 @@ public:
 
     virtual ~Layer() = default;
 };
-#endif

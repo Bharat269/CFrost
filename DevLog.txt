@@ -15,3 +15,7 @@ NEW GOALS (deliverable mvp before all these optimaztions)-
 -softmax
 Since this is a resource critical phase, tensor class may need to be optimized for elaborate row major or column major support. 
 Furthermore the math classes might need to be perfected, and look into CUDA support.
+
+01-11-26
+split all headers into .cpp implementations and .h declarations to accomodate CMake. 
+Next up is adding stride to tensor class and rewiring tensor usage for the entire system

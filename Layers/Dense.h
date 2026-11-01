@@ -1,11 +1,9 @@
-#ifndef DENSE_H
-#define DENSE_H
-#include "tensor.h"
-#include <string>
-#include <memory>
-#include <random>
+#pragma once
+#include <Tensor/tensor.h>
+#include <Activations\ActivationClasses.h>
 #include "layer.h"
-#include "ActivationClasses.h"
+#include <memory>
+#include <Activations\ActivationClasses.h>
 class Dense: public Layer{
     public:
     int size;  //neuron count
@@ -29,53 +27,12 @@ class Dense: public Layer{
     //base class activation pointer. inherited class will be assigned later.
     std::unique_ptr<ActivationBaseClass> activation;
     
-    Dense(int Size, std::string Activation="linear"){
-        size=Size;
-
-        last_output.setDim({size});
-        last_raw_output.setDim({size});
-        output_dims={size};
-
-        activation = assignActivation(Activation);
-    }
+    Dense(int Size, std::string Activation="linear");
     
-    void build(const std::vector<int> &prev_dim) override { // resize and initialize all parameters. Called sequentially for all layers.
-        if(prev_dim.empty())throw std::invalid_argument("In Dense::build(), previous layer has no output dimensions.");
-        if(prev_dim.size()!=1) throw std::invalid_argument("In Dense::build(), output dimensions of the layer before a dense layer must be 1D."); //in case someone tries fitting a conv2d or pool layer without flattening ig
-        int in = prev_dim[0];
-        weights.setDim({size,in}); //input being scalar here is okk because dense will only have 1D
-        grad_weights.setDim({size,in});
-        bias.setDim({size});
-        grad_bias.setDim({size});
-        last_input.setDim({in});
-        grad_input.setDim({in});
-        weights.randomizeVal(size*in);
-    }
-    tensor backward(tensor &grad_op) override{
-        // f'(raw output)
-        tensor delta = activation->returnDerivative(last_raw_output);
-        
-        // convert it into dL/dZ aka theta(delta here)
-        delta = multiply(delta,grad_op);
-
-        //dL/dW
-        grad_weights= outerProduct(delta,last_input);
-        //dL/dBias
-        grad_bias = delta;
-        //dL/dinput
-        grad_input = transposeMatMul(delta, weights);
-        return grad_input;
-    }
-    void layerCompute(tensor &input) override { //forward pass calc
-        last_input.copyTensor(input);
-        last_raw_output=add(matMul( weights,input),bias);
-        last_output = activation->performActivation(last_raw_output);
-
-    }
-    void update(double learning_rate) override {
-        updateWeights(weights, grad_weights, learning_rate);
-        updateBias(bias, grad_bias, learning_rate);
-    }
-
+    void build(const std::vector<int> &prev_dim) override ; // resize and initialize all parameters. Called sequentially for all layers.
+    //backward pass of the dense layer type
+    tensor backward(tensor &grad_op) override;
+    //forward pass calc of the dense layer type
+    void layerCompute(tensor &input) override ;
+    void update(double learning_rate) override ;
 };
-#endif

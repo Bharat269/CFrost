@@ -1,8 +1,9 @@
+#include <MathModules/custommath.h>
 #include <Eigen/Dense>
 #include <cmath>
 #include <algorithm>
 #include <stdexcept>
-#include "tensor.h"
+#include <Tensor/tensor.h>
 #include <unsupported/Eigen/CXX11/Tensor>
 //using aliases for eigen tensors
 using EigenTensor1D = Eigen::Tensor<double, 1, Eigen::RowMajor>;

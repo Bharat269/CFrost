@@ -1,8 +1,6 @@
 //this is a template for the background math
-#ifndef CUSTOMMATH_H
-#define CUSTOMMATH_H
-#include "tensor.h"
-#include <string>
+#pragma once
+#include <Tensor/tensor.h>
 
 /*
 CREATE A HELPER FUNCTION TO CONVERT TO AND FROM CUSTOM TENSOR A CPU OR GPU BASED BUILT-IN TENSOR FOR BETTER ABSTRACTION
@@ -53,4 +51,4 @@ result:  {filter_count, output_height, output_width}
 */
 tensor conv2D(const tensor& input,const tensor& filters,int step);
 tensor addBias(const tensor& feature_maps, const tensor& bias);
-#endif
+
