@@ -5,11 +5,12 @@ project(CFrost LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_library(CFrost
-    Layers/Dense.cpp
-    Activations/ActivationClasses.cpp
-    Models/sequential.cpp
     Tensor/Tensor.cpp
+    Layers/Dense.cpp
+    MathModules/CPU/custommath.cpp
+    Activations/ActivationClasses.cpp
     LossClasses/LossClasses.cpp
+    Models/sequential.cpp
 )
 
 target_include_directories(CFrost
