@@ -73,7 +73,7 @@ void Dense::layerCompute(tensor &input)  { //forward pass calc
     last_output = activation->performActivation(last_raw_output);
 
 }
-void Dense::update(double learning_rate)  {
-    updateWeights(weights, grad_weights, learning_rate);
-    updateBias(bias, grad_bias, learning_rate);
+void Dense::update(OptimizerBaseClass* optimizer)  {
+    optimizer->update(weights,grad_weights);
+    optimizer->update(bias,grad_bias);
 }

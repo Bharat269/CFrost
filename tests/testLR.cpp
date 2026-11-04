@@ -1,5 +1,6 @@
 #include <iostream>
 #include <Models/sequential.h>
+#include <Optimizers/SGD.h>
 #include <Layers/Dense.h>
 #include <vector>
 
@@ -18,7 +19,8 @@ int main(){
         }
     }
     // std::cout<<"Start 2"<<std::endl;
-    Seq model({2});
+    SGD sgd_optimizer(0.001);
+    Seq model({2}, &sgd_optimizer);
     model.add(std::make_unique<Dense>(2, "relu"));
     model.add(std::make_unique<Dense>(5, "relu"));
     model.add(std::make_unique<Dense>(5, "relu"));

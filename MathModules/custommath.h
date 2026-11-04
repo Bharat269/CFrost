@@ -37,7 +37,7 @@ tensor subtract(const tensor& a,const tensor& b);
 tensor multiply(const tensor& a,const tensor& b);
 
 void tensorMulScalar_inplace(tensor& a, double b);
-
+tensor tensorMulScalar(tensor &a, double b);
 // Parameter updates
 void updateWeights(tensor& weights,const tensor& gradWeights,double learningRate);
 

@@ -11,6 +11,7 @@ add_library(CFrost
     Activations/ActivationClasses.cpp
     LossClasses/LossClasses.cpp
     Models/sequential.cpp
+    Optimizers/SGD.cpp
 )
 add_executable(CFrostTests
     tests/testLR.cpp

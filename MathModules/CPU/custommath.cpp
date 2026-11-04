@@ -159,9 +159,15 @@ tensor multiply(const tensor& a,const tensor& b)
     return result;
 }
 
-void tensorMulScalar_inplace(tensor& a, double b){
+void tensorMulScalar_inplace(tensor& a, double b){//mltiplies scalar to each element in place
     for(double& x : a.getValArray())
         x *= b;
+}
+tensor tensorMulScalar(tensor &a, double b){//creates new tensor and multiplies each value with a scalar
+    tensor result;
+    result.copyTensor(a);
+    tensorMulScalar_inplace(result,b);
+    return result;
 }
 // Parameter updates
 void updateWeights(tensor& weights,const tensor& gradWeights,double learningRate)

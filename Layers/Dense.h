@@ -34,5 +34,5 @@ class Dense: public Layer{
     tensor backward(tensor &grad_op) override;
     //forward pass calc of the dense layer type
     void layerCompute(tensor &input) override ;
-    void update(double learning_rate) override ;
+    void update(OptimizerBaseClass* optimizer) override ;
 };

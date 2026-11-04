@@ -4,9 +4,10 @@
 #include <algorithm>
 
 
-Seq::Seq(std::vector<int> single_input_dim, std::string Loss){
+Seq::Seq(std::vector<int> single_input_dim, OptimizerBaseClass *model_optimizer, std::string Loss){
     loss = assignLoss(Loss);
     input_dim=single_input_dim;
+    optimizer = std::move(model_optimizer);
 }
 void Seq::add(std::unique_ptr<Layer> layer) {
     layers.push_back(std::move(layer));
@@ -20,7 +21,7 @@ void Seq::compile(){ // resize weight matrices of each layer
     compiled=true;
 }
 
-double Seq::onePassUpdate(tensor &input_vals, tensor &target, double &learning_rate){  //perform one pass through the neural net(fwd computation, back propogation, parameter update)
+double Seq::onePassUpdate(tensor &input_vals, tensor &target){  //perform one pass through the neural net(fwd computation, back propogation, parameter update)
     if(!compiled) throw std::invalid_argument("Model not compiled yet.");
     //forward pass
     layers[0]->layerCompute(input_vals);
@@ -35,7 +36,7 @@ double Seq::onePassUpdate(tensor &input_vals, tensor &target, double &learning_r
     }
     //update weights and bias
     for(auto &x:layers){
-        x->update(learning_rate);
+        x->update(optimizer);
     }
     return l;
 }
@@ -49,7 +50,7 @@ double Seq::test(tensor &input_vals, tensor &target){
     double l = loss->getError(target,layers[layers.size()-1]->last_output);
     return l;
 }
-std::vector<std::pair<double,double>> Seq::fit(std::vector<tensor> &inputArray, std::vector<tensor> &targetArray, int epochs, double learning_rate ,bool shuffle, float split){
+std::vector<std::pair<double,double>> Seq::fit(std::vector<tensor> &inputArray, std::vector<tensor> &targetArray, int epochs, bool shuffle, float split){
     if(!compiled) throw std::invalid_argument("In Seq::fit(), Model not compiled yet.");
     if(inputArray.size()!=targetArray.size()) throw std::invalid_argument("Seq::fit(), number of rows in input data and target data are not equal");
     std::vector<std::pair<double,double>> history;
@@ -71,7 +72,7 @@ std::vector<std::pair<double,double>> Seq::fit(std::vector<tensor> &inputArray, 
             tensor ip = inputArray[i];
             tensor op = targetArray[i];
             if(ip.getDims()!=input_dim) throw std::invalid_argument("Given input dimensions and model input dimensions dont match at index "+ std::to_string(idx));
-            train_avg_error += onePassUpdate(ip,op,learning_rate); //this one gets loss and updates
+            train_avg_error += onePassUpdate(ip,op); //this one gets loss and updates
         }
         train_avg_error/=train;
         double test_avg_error=0;

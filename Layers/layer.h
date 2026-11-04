@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 #include <Tensor/tensor.h>
+#include <Optimizers/OptimizerBaseClass.h>
+#include <memory>
 class Layer {
 public:
     std::vector<int> output_dims; // to pass into the next layer so it can form its parameter tensor. Used in build function of layers.
@@ -14,7 +16,7 @@ public:
 
     virtual void layerCompute(tensor &input_vals) = 0;
 
-    virtual void update(double learning_rate) = 0;
+    virtual void update(OptimizerBaseClass *optimizer) = 0;
 
     virtual ~Layer() = default;
 };
