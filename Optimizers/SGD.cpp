@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 SGD::SGD(){
-    learning_rate=0.2;
+    learning_rate=0.0005;
 }
 SGD::SGD(double opt_learning_rate){
     learning_rate=opt_learning_rate;
