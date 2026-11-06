@@ -5,5 +5,6 @@ class SGD:public OptimizerBaseClass{
     public:
     SGD();
     SGD(double opt_learning_rate);
-    void update(tensor &weights, tensor &gradients) override;
+    void initialize_state(ModelBaseClass*) override; //not needed for SGD, just implmenting the virtul func
+    void update(tensor &weights, tensor &gradients, int &layer_idx) override; //layer_idx wont be used
 };

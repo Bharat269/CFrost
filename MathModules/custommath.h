@@ -32,6 +32,7 @@ tensor transposeMatMul(const tensor& delta,const tensor& weights);
 tensor add(const tensor& a, const tensor& b);
 
 tensor subtract(const tensor& a,const tensor& b);
+void subtract_in_place(tensor& a,const tensor& b);
 
 //multiply corresponding elements
 tensor multiply(const tensor& a,const tensor& b);

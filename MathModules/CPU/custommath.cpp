@@ -149,7 +149,12 @@ tensor subtract(const tensor& a,const tensor& b)
     for (int i = 0; i < a.getSize(); ++i)result.getValArray()[i] =a.getValArray()[i] - b.getValArray()[i];
     return result;
 }
-
+void subtract_in_place( tensor& a,const tensor& b){
+    if(a.getDims() != b.getDims())throw std::invalid_argument("In CustomMathCPU.subtract_in_place(),Tensor dimensions must match for subtraction");
+    for (int i = 0;i<a.getSize();i++){
+        a.getValArray()[i] -= b.getValArray()[i];
+    }
+}
 //multiply corresponding elements
 tensor multiply(const tensor& a,const tensor& b)
 {

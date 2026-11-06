@@ -7,7 +7,7 @@
 Seq::Seq(std::vector<int> single_input_dim, OptimizerBaseClass *model_optimizer, std::string Loss){
     loss = assignLoss(Loss);
     input_dim=single_input_dim;
-    optimizer = std::move(model_optimizer);
+    optimizer = model_optimizer;
 }
 void Seq::add(std::unique_ptr<Layer> layer) {
     layers.push_back(std::move(layer));
@@ -18,6 +18,7 @@ void Seq::compile(){ // resize weight matrices of each layer
     for(int i = 1;i<layers.size();i++){
         layers[i]->build(layers[i-1]->output_dims);
     }
+    optimizer->initialize_state(this);
     compiled=true;
 }
 
@@ -35,8 +36,8 @@ double Seq::onePassUpdate(tensor &input_vals, tensor &target){  //perform one pa
         gradient = layers[i]->backward(gradient);
     }
     //update weights and bias
-    for(auto &x:layers){
-        x->update(optimizer);
+    for(int i = layers.size() - 1; i >= 0; i--) {
+        layers[i]->update(this->optimizer,i);
     }
     return l;
 }
@@ -69,8 +70,8 @@ std::vector<std::pair<double,double>> Seq::fit(std::vector<tensor> &inputArray, 
         int i;
         for(i = 0;i<train;i++){
             int idx = indices[i];
-            tensor ip = inputArray[i];
-            tensor op = targetArray[i];
+            tensor ip = inputArray[idx];
+            tensor op = targetArray[idx];
             if(ip.getDims()!=input_dim) throw std::invalid_argument("Given input dimensions and model input dimensions dont match at index "+ std::to_string(idx));
             train_avg_error += onePassUpdate(ip,op); //this one gets loss and updates
         }
@@ -78,8 +79,8 @@ std::vector<std::pair<double,double>> Seq::fit(std::vector<tensor> &inputArray, 
         double test_avg_error=0;
         for(;i<inputArray.size();i++){
             int idx = indices[i];
-            tensor ip = inputArray[i];
-            tensor op = targetArray[i];
+            tensor ip = inputArray[idx];
+            tensor op = targetArray[idx];
             if(ip.getDims()!=input_dim) throw std::invalid_argument("Given input dimensions and model input dimensions dont match at index "+ std::to_string(idx));
             test_avg_error+=test(ip,op); //this one gets loss and doesnt update
         }

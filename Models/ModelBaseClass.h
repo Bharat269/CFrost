@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <LossClasses/LossClasses.h>
-#include <Optimizers/OptimizerBaseClass.h>
+class OptimizerBaseClass;//to avoid circular dependency of model and optimizer
 class ModelBaseClass{
     public:
     std::unique_ptr<LossBaseClass> loss;
