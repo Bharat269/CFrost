@@ -1,6 +1,7 @@
 #pragma once
 #include <Tensor/tensor.h>
-#include <Models/ModelBaseClass.h>
+class ModelBaseClass;//to avoid circular dependency optim->model->layer->optim
+//#include <Models/ModelBaseClass.h> 
 class OptimizerBaseClass{
     public:
     virtual void initialize_state(ModelBaseClass*)=0; //adjust the optimizers state array dimnsion to match the layers/params in the model. irrelevant for sgd, needed for adam

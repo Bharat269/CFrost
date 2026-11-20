@@ -1,9 +1,9 @@
 #pragma once
 #include "ModelBaseClass.h"
-#include <Layers/layer.h>
+
 class Seq: public ModelBaseClass{
     private:
-    std::vector<std::unique_ptr<Layer>> layers;
+    
     // std::unique_ptr<LossBaseClass> loss;
     // OptimizerBaseClass *optimizer;
     // std::vector<int> input_dim; //will* be specified to an inherited class in constructor during run time

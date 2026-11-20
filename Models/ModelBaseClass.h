@@ -1,9 +1,12 @@
 #pragma once
 #include <vector>
+#include <memory>
 #include <LossClasses/LossClasses.h>
+#include <Layers/layer.h>
 class OptimizerBaseClass;//to avoid circular dependency of model and optimizer
 class ModelBaseClass{
     public:
+    std::vector<std::unique_ptr<Layer>> layers;
     std::unique_ptr<LossBaseClass> loss;
     OptimizerBaseClass *optimizer;
     std::vector<int> input_dim; //will* be specified to an inherited class in constructor during run time

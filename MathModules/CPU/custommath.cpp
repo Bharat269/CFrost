@@ -155,6 +155,12 @@ void subtract_in_place( tensor& a,const tensor& b){
         a.getValArray()[i] -= b.getValArray()[i];
     }
 }
+//square each element of tensor
+void tensor_element_sq_in_place(tensor &a){
+    for(double &x:a.getValArray()){
+        x*=x;
+    }
+}
 //multiply corresponding elements
 tensor multiply(const tensor& a,const tensor& b)
 {

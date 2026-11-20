@@ -36,7 +36,7 @@ void subtract_in_place(tensor& a,const tensor& b);
 
 //multiply corresponding elements
 tensor multiply(const tensor& a,const tensor& b);
-
+void tensor_element_sq_in_place(tensor &a);
 void tensorMulScalar_inplace(tensor& a, double b);
 tensor tensorMulScalar(tensor &a, double b);
 // Parameter updates
